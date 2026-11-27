@@ -13,6 +13,11 @@ public class PlayerMovement : MonoBehaviour
     public InputActionReference jumpAction;
     public InputActionReference parryAction;
 
+    [Header("Parry Settings")]
+    [SerializeField] private float parryBounceForce = 14f;
+
+    private ParryableObject nearbyParryObject;
+
     private Rigidbody2D rb;
     private Vector2 movementInput;
     private bool isGrounded;
@@ -70,14 +75,37 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnParry(InputAction.CallbackContext context)
     {
-        Debug.Log("Parry pressed!");
+        if (nearbyParryObject != null)
+        {
+            nearbyParryObject.TryParry(rb, parryBounceForce);
+        }
     }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
+        }
+    }
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        ParryableObject parryObject = other.GetComponent<ParryableObject>();
+
+        if (parryObject != null)
+        {
+            nearbyParryObject = parryObject;
+            Debug.Log("Parry object detected!");
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        ParryableObject parryObject = other.GetComponent<ParryableObject>();
+
+        if (parryObject != null && nearbyParryObject == parryObject)
+        {
+            nearbyParryObject = null;
+            Debug.Log("Parry object left range!");
         }
     }
 }
