@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Input Actions")]
     public InputActionReference moveAction;
     public InputActionReference jumpAction;
+    public InputActionReference parryAction;
 
     private Rigidbody2D rb;
     private Vector2 movementInput;
@@ -25,6 +26,8 @@ public class PlayerMovement : MonoBehaviour
     {
         moveAction.action.Enable();
         jumpAction.action.Enable();
+        parryAction.action.Enable();
+        parryAction.action.performed += OnParry;
 
         jumpAction.action.performed += OnJump;
     }
@@ -32,6 +35,8 @@ public class PlayerMovement : MonoBehaviour
     private void OnDisable()
     {
         jumpAction.action.performed -= OnJump;
+        parryAction.action.performed -= OnParry;
+        parryAction.action.Disable();
 
         moveAction.action.Disable();
         jumpAction.action.Disable();
@@ -63,6 +68,11 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void OnParry(InputAction.CallbackContext context)
+    {
+        Debug.Log("Parry pressed!");
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
@@ -71,4 +81,5 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 }
+
 
