@@ -1,37 +1,47 @@
+using System.Collections;
 using UnityEngine;
 
 public class ParryableObject : MonoBehaviour
 {
+    [Header("Parry Settings")]
     public bool isParryable = true;
+    [SerializeField] private float reactivationTime = 0.5f;
 
-    private bool playerInRange;
+    [Header("Visual Feedback")]
+    [SerializeField] private Color normalColor = Color.magenta;
+    [SerializeField] private Color successfulParryColor = Color.white;
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private SpriteRenderer spriteRenderer;
+
+    private void Awake()
     {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = true;
-            Debug.Log("Player is in parry range!");
-        }
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.color = normalColor;
     }
 
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = false;
-            Debug.Log("Player left parry range!");
-        }
-    }
     public void TryParry(Rigidbody2D playerRb, float bounceForce)
     {
         if (!isParryable) return;
+
+        isParryable = false;
 
         playerRb.linearVelocity = new Vector2(
             playerRb.linearVelocity.x,
             bounceForce
         );
 
+        spriteRenderer.color = successfulParryColor;
+
         Debug.Log("Successful parry!");
+
+        StartCoroutine(ReactivateParry());
+    }
+
+    private IEnumerator ReactivateParry()
+    {
+        yield return new WaitForSeconds(reactivationTime);
+
+        isParryable = true;
+        spriteRenderer.color = normalColor;
     }
 }
