@@ -21,10 +21,12 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 movementInput;
     private bool isGrounded;
+    private PlayerParryFeedback parryFeedback;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        parryFeedback = GetComponent<PlayerParryFeedback>();
     }
 
     private void OnEnable()
@@ -75,10 +77,16 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnParry(InputAction.CallbackContext context)
     {
+        bool successful = false;
+
         if (nearbyParryObject != null)
         {
-            nearbyParryObject.TryParry(rb, parryBounceForce);
+            successful = nearbyParryObject.TryParry(
+                rb, parryBounceForce
+            );
         }
+
+        parryFeedback.PlayParryEffect(successful);
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -94,7 +102,7 @@ public class PlayerMovement : MonoBehaviour
         if (parryObject != null)
         {
             nearbyParryObject = parryObject;
-            Debug.Log("Parry object detected!");
+            parryObject.SetPlayerInRange(true);
         }
     }
 
@@ -105,6 +113,7 @@ public class PlayerMovement : MonoBehaviour
         if (parryObject != null && nearbyParryObject == parryObject)
         {
             nearbyParryObject = null;
+            parryObject.SetPlayerInRange(false);
             Debug.Log("Parry object left range!");
         }
     }
